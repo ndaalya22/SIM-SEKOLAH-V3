@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14532d">
+  <title>SIM SDIT ANNIHAYAH</title>
+
+  <!-- Menghubungi server lebih awal (mempercepat pembukaan) -->
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://script.google.com" crossorigin>
+  <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+
+  <!-- Layar pembuka: CSS ini sengaja ada di sini agar tampil SEKETIKA, sebelum pustaka lain selesai dimuat -->
+  <style>
+    html, body { margin: 0; height: 100%; }
+    #splash { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; overflow: hidden; color: #ecfdf5;
+      background: radial-gradient(1100px 650px at 12% 8%, rgba(34,197,94,.30), transparent 60%), radial-gradient(900px 600px at 92% 92%, rgba(16,185,129,.28), transparent 60%), linear-gradient(135deg, #052e16, #14532d 55%, #065f46);
+      font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif; transition: opacity .6s ease, transform .6s ease; }
+    #splash.keluar { opacity: 0; transform: scale(1.04); pointer-events: none; }
+    #splash .kisi { position: absolute; inset: -44px; background-image: linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px);
+      background-size: 44px 44px; -webkit-mask-image: radial-gradient(ellipse at center, #000 25%, transparent 78%); mask-image: radial-gradient(ellipse at center, #000 25%, transparent 78%); animation: spKisi 22s linear infinite; }
+    @keyframes spKisi { to { transform: translate(44px, 44px); } }
+    #splash .batang { position: absolute; left: 0; right: 0; bottom: 0; height: 38%; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 2%; gap: 6px; opacity: .9; }
+    #splash .batang i { flex: 1; border-radius: 6px 6px 0 0; background: rgba(110,231,183,.16); transform-origin: bottom; animation: spBatang 2.6s ease-in-out infinite alternate; }
+    @keyframes spBatang { from { transform: scaleY(.3); } to { transform: scaleY(1); } }
+    #splash .tengah { position: relative; text-align: center; padding: 24px; max-width: 420px; width: 100%; }
+    #splash .logo { width: 108px; height: 108px; margin: 0 auto 18px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden;
+      animation: spMuncul .9s cubic-bezier(.2,.9,.25,1.2) both, spDenyut 2.6s ease-in-out .9s infinite; }
+    #splash .logo img { width: 100%; height: 100%; object-fit: contain; padding: 6px; box-sizing: border-box; }
+    @keyframes spMuncul { from { opacity: 0; transform: scale(.4) rotate(-12deg); } to { opacity: 1; transform: none; } }
+    @keyframes spDenyut { 0%, 100% { box-shadow: 0 0 0 0 rgba(110,231,183,.5); } 50% { box-shadow: 0 0 0 22px rgba(110,231,183,0); } }
+    #splash h1 { margin: 0; font-size: 1.55rem; font-weight: 800; letter-spacing: .04em; animation: spNaik .8s ease .25s both; }
+    #splash .sub { margin: 6px 0 22px; font-size: .82rem; color: #a7f3d0; animation: spNaik .8s ease .4s both; }
+    @keyframes spNaik { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    #splash .garis { height: 6px; border-radius: 99px; background: rgba(255,255,255,.14); overflow: hidden; animation: spNaik .8s ease .55s both; }
+    #splash .garis span { display: block; height: 100%; width: 4%; border-radius: 99px; background: linear-gradient(90deg, #34d399, #bbf7d0); transition: width .45s ease; }
+    #splash .teks { margin: 10px 0 0; min-height: 1.2em; font-size: .75rem; color: #d1fae5; animation: spNaik .8s ease .7s both; }
+    #splash .galat { display: none; margin-top: 14px; padding: 12px; border-radius: 10px; background: rgba(127,29,29,.55); border: 1px solid rgba(254,202,202,.5); font-size: .78rem; line-height: 1.4; }
+    #splash .galat button { margin-top: 10px; padding: 7px 16px; border: 0; border-radius: 8px; background: #fff; color: #7f1d1d; font-weight: 700; cursor: pointer; }
+    @media (prefers-reduced-motion: reduce) { #splash *, #splash { animation: none !important; transition: none !important; } }
+  </style>
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Pustaka (versi dikunci agar tampilan tidak berubah sendiri) -->
+  <script src="js/config.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+  <div id="splash" role="status" aria-live="polite">
+    <div class="kisi"></div>
+    <div class="batang" id="sp-batang"></div>
+    <div class="tengah">
+      <div class="logo" id="sp-logo"><svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><path d="M32 10 4 24l28 14 22-11v16h4V24z" fill="#15803d"/><path d="M16 36v10c0 5 7 9 16 9s16-4 16-9V36L32 46z" fill="#16a34a"/></svg></div>
+      <h1 id="sp-nama">SIM SEKOLAH</h1>
+      <p class="sub">Sistem Informasi Manajemen Sekolah</p>
+      <div class="garis"><span id="sp-isi"></span></div>
+      <p class="teks" id="sp-teks">Menyiapkan aplikasi…</p>
+      <div class="galat" id="sp-galat"><span id="sp-galat-teks"></span><br><button onclick="location.reload()">Muat Ulang</button></div>
+    </div>
+  </div>
+  <noscript><p style="padding:24px;font-family:sans-serif">Aplikasi ini memerlukan JavaScript. Aktifkan JavaScript pada peramban Anda.</p></noscript>
+  <div id="root"></div>
+
+  <script>
+    // Mode halaman: ?mode=scanner → pemindai absensi layar penuh (bisa dipasang di layar utama HP)
+    window.APP_MODE = new URLSearchParams(location.search).get('mode') === 'scanner' ? 'scanner' : '';
+
+    // Kendali layar pembuka
+    (function () {
+      var C = window.SIM_CONFIG || {}, mulai = Date.now(), tutup = false, pernah = false, cfg = null;
+      try { pernah = !!localStorage.getItem('sim_pernah'); cfg = JSON.parse(localStorage.getItem('sim_cfg') || 'null'); } catch (e) {}
+      var nama = (cfg && cfg.namaSekolah) || C.NAMA_DEFAULT || 'Sekolah';
+      document.getElementById('sp-nama').textContent = 'SIM ' + nama;
+      if (cfg && cfg.logoUrl) { var im = new Image(); im.alt = ''; im.onload = function () { var l = document.getElementById('sp-logo'); if (l && !tutup) { l.innerHTML = ''; l.appendChild(im); } }; im.src = cfg.logoUrl; }
+      var b = ''; for (var i = 0; i < 26; i++) b += '<i style="height:' + (22 + (i * 37) % 70) + '%;animation-delay:' + ((i * 29) % 26) / 10 + 's"></i>';
+      document.getElementById('sp-batang').innerHTML = b;
+      var minimum = pernah ? 700 : 1300;
+      var sp = window.simSplash = {
+        set: function (p, t) { var i = document.getElementById('sp-isi'), x = document.getElementById('sp-teks'); if (i) i.style.width = p + '%'; if (t && x) x.textContent = t; },
+        selesai: function () {
+          if (tutup) return; tutup = true;
+          setTimeout(function () {
+            var s = document.getElementById('splash'); if (!s) return;
+            sp.set(100, 'Siap'); s.classList.add('keluar'); setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 700);
+            try { localStorage.setItem('sim_pernah', '1'); } catch (e) {}
+          }, Math.max(0, minimum - (Date.now() - mulai)));
+        },
+        galat: function (pesan) {
+          if (tutup) return; var g = document.getElementById('sp-galat'), t = document.getElementById('sp-galat-teks');
+          if (g && t) { t.textContent = pesan; g.style.display = 'block'; }
+        }
+      };
+      window.addEventListener('error', function (e) { sp.galat('Terjadi galat saat memuat aplikasi: ' + (e.message || 'tidak diketahui')); });
+      setTimeout(function () { if (!tutup) sp.set(0, 'Memuat lebih lama dari biasa… periksa koneksi internet Anda.'); }, 25000);
+    })();
+  </script>
+
+  <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <!-- Pemuat modul: menyusun JSX satu kali lalu menyimpannya di peramban, sehingga kunjungan berikutnya tanpa proses penyusunan -->
+  <script src="js/loader.js"></script>
+</body>
+</html>

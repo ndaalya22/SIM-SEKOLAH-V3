@@ -1,0 +1,19 @@
+# Netlify — situs statis tanpa proses build. Folder publikasi = folder ini (root).
+[build]
+  publish = "."
+
+# Berkas modul selalu divalidasi ulang (cepat lewat ETag) supaya pembaruan langsung terlihat.
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(self)"
