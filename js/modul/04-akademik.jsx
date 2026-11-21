@@ -307,7 +307,7 @@ const DataSiswa = () => {
                   <p>{sekolah.kota}, {tanggalHariIni()}</p>
                   <p>Kepala SDIT Annihayah,</p>
                   <br/><br/><br/>
-                  <p className="font-bold underline">{sekolah.kepsek}</p>
+                  <p className="font-bold underline"><NamaTtd nama={sekolah.kepsek} maks="80mm" /></p>
                   <p>NIP. {sekolah.nipKepsek || '-'}</p>
                 </div>
               </div>
@@ -499,7 +499,7 @@ const DataGuru = () => {
                 <div className="text-center">
                   <p>{sekolah.kota}, {tanggalHariIni()}</p>
                   <p>Kepala SDIT Annihayah,</p><br/><br/><br/>
-                  <p className="font-bold underline">{sekolah.kepsek}</p>
+                  <p className="font-bold underline"><NamaTtd nama={sekolah.kepsek} maks="100mm" /></p>
                 </div>
               </div>
             </div>
@@ -561,6 +561,10 @@ const InputNilai = () => {
     if (items.some((it) => isNaN(it.nilai) || it.nilai < 0 || it.nilai > 100)) return showAlert('Nilai harus berupa angka 0–100.', 'error');
     jalankan(async () => {
       await DB.simpanNilaiRapor({ nisn: selectedSiswa, nama: currentSiswaData.nama, kelas: selectedKelas, periode: selectedPeriode, items });
+      if (isPts && kunciPts && (String(catatanPts.catatan).trim() || catatanPts.id)) {
+        await DB.simpan('Catatan_Rapor', { ...catatanPts, nisn: selectedSiswa, semester: kunciPts, catatan: String(catatanPts.catatan || '').trim(),
+          sakit: Number(catatanPts.sakit) || 0, izin: Number(catatanPts.izin) || 0, alpha: Number(catatanPts.alpha) || 0 });
+      }
       if (selectedPeriode.includes('Rapor Semester')) {
         await DB.simpan('Catatan_Rapor', { ...formP, nisn: selectedSiswa, semester: semesterDariPeriode(selectedPeriode),
           sakit: Number(formP.sakit) || 0, izin: Number(formP.izin) || 0, alpha: Number(formP.alpha) || 0 });
@@ -580,6 +584,17 @@ const InputNilai = () => {
     setFormP(ada ? { ...KOSONG_P, ...ada } : KOSONG_P);
   }, [selectedSiswa, semesterKey, DB.rows('Catatan_Rapor')]);
   const ubahP = (k) => (e) => setFormP({ ...formP, [k]: e.target.value });
+
+  // Catatan perkembangan untuk periode PTS 1 / PTS 2. Disimpan di Catatan_Rapor dengan kunci "PTS 1" / "PTS 2",
+  // terpisah dari catatan Rapor Semester sehingga keduanya tidak saling menimpa.
+  const isPts = /^PTS/.test(selectedPeriode);
+  const kunciPts = (/^PTS\s*\d/.exec(selectedPeriode) || [''])[0];
+  const KOSONG_PTS = { id: '', catatan: '', ekskul: '', predikat: '', ketEkskul: '', sakit: 0, izin: 0, alpha: 0 };
+  const [catatanPts, setCatatanPts] = useState(KOSONG_PTS);
+  useEffect(() => {
+    const ada = kunciPts ? DB.rows('Catatan_Rapor').find((c) => c.nisn === selectedSiswa && c.semester === kunciPts) : null;
+    setCatatanPts(ada ? { ...KOSONG_PTS, ...ada } : KOSONG_PTS);
+  }, [selectedSiswa, kunciPts, DB.rows('Catatan_Rapor')]);
   const inpP = 'w-full border p-2 rounded mt-1 text-sm';
 
   return (
@@ -646,8 +661,17 @@ const InputNilai = () => {
           </table>
         </div>
 
+        {isPts && (
+          <div className="mb-5 border-t pt-4 space-y-1">
+            <label className="text-xs font-semibold text-gray-600"><i className="fas fa-comment-dots text-green-600 mr-1"></i> Catatan Perkembangan Siswa — {kunciPts}</label>
+            <p className="text-[11px] text-gray-500">Untuk <strong>{currentSiswaData.nama}</strong>. Isian ini langsung tampil pada pratinjau dan tersimpan bersama nilai.</p>
+            <textarea rows="4" maxLength={1000} value={catatanPts.catatan} onChange={(e) => setCatatanPts({ ...catatanPts, catatan: e.target.value })} placeholder="Catatan perkembangan ananda…" className="w-full border p-2 rounded mt-1 text-sm" />
+            <p className="text-[10px] text-gray-400 text-right">{String(catatanPts.catatan || '').length}/1000</p>
+          </div>
+        )}
+
         <button onClick={handleSimpanSemua} disabled={proses} className="bg-blue-600 disabled:opacity-60 text-white px-5 py-2 rounded text-sm font-semibold shadow-sm hover:bg-blue-700">
-          <i className="fas fa-save mr-1"></i> {isRapor ? 'Simpan Nilai & Data Pendukung' : 'Simpan Seluruh Nilai Mapel'}
+          <i className="fas fa-save mr-1"></i> {isRapor ? 'Simpan Nilai & Data Pendukung' : isPts ? 'Simpan Nilai & Catatan Perkembangan' : 'Simpan Seluruh Nilai Mapel'}
         </button>
       </div>
 
@@ -729,7 +753,7 @@ const InputNilai = () => {
 
           <div className="border border-black p-3 text-xs space-y-1">
             <h4 className="font-bold uppercase">C. Catatan Perkembangan Siswa</h4>
-            <p className="italic">{catatanRapor && catatanRapor.catatan ? catatanRapor.catatan : 'Catatan wali kelas diisi pada periode Rapor Semester.'}</p>
+            <p className="italic whitespace-pre-line">{String(catatanPts.catatan || '').trim() ? catatanPts.catatan : '—'}</p>
           </div>
 
           <div className="mt-6 flex justify-between items-end pt-2 text-xs">
@@ -743,7 +767,7 @@ const InputNilai = () => {
               <p>{sekolah.kota}, {tanggalHariIni()}</p>
               <p>Wali Kelas,</p>
               <br/><br/><br/>
-              <p className="font-bold underline">{rombel ? rombel.wali : '...................'}</p>
+              <p className="font-bold underline"><NamaTtd nama={rombel ? rombel.wali : '...................'} maks="80mm" /></p>
               <p>NIP. {waliGuru && waliGuru.nip ? waliGuru.nip : '-'}</p>
             </div>
           </div>
@@ -1113,12 +1137,12 @@ const LembarRapor = ({ sekolah, siswa, kelas, semester, daftarMapel, pendukung, 
                 <div className="w-14 h-14 border rounded-full flex items-center justify-center text-[7px] text-white-400 border-white-600">
                   
                 </div>
-                <p className="font-bold underline">{sekolah.kepsek}<br/>NIP. {sekolah.nipKepsek || '-'}</p>
+                <p className="font-bold underline"><NamaTtd nama={sekolah.kepsek} maks="56mm" /><br/>NIP. {sekolah.nipKepsek || '-'}</p>
               </div>
 
               <div className="space-y-12">
                 <p>{sekolah.kota}, {tanggalHariIni()}<br/>Wali Kelas,</p>
-                <p className="font-bold underline">{wali}<br/>NIP. {waliGuru && waliGuru.nip ? waliGuru.nip : '-'}</p>
+                <p className="font-bold underline"><NamaTtd nama={wali} maks="56mm" /><br/>NIP. {waliGuru && waliGuru.nip ? waliGuru.nip : '-'}</p>
               </div>
             </div>
 
@@ -1296,7 +1320,7 @@ const ArsipLulusan = () => {
                 <p>{sekolah.kota}, {tanggalPanjang(selectedArsip.tglIjazah) || tanggalHariIni()}</p>
                 <p>Kepala SDIT Annihayah,</p>
                 <br/><br/><br/>
-                <p className="font-bold underline">{sekolah.kepsek}</p>
+                <p className="font-bold underline"><NamaTtd nama={sekolah.kepsek} maks="100mm" /></p>
                 <p>NIP. {sekolah.nipKepsek || '-'}</p>
               </div>
             </div>
@@ -1371,7 +1395,7 @@ const ArsipLulusan = () => {
                 <p>{sekolah.kota}, {tanggalPanjang(selectedArsip.tglIjazah) || tanggalHariIni()}</p>
                 <p>Kepala SDIT Annihayah,</p>
                 <br/><br/><br/>
-                <p className="font-bold underline">{sekolah.kepsek}</p>
+                <p className="font-bold underline"><NamaTtd nama={sekolah.kepsek} maks="100mm" /></p>
                 <p>NIP. {sekolah.nipKepsek || '-'}</p>
               </div>
             </div>

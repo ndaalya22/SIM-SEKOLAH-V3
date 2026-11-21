@@ -355,3 +355,33 @@ const useAksi = () => {
 };
 
 const KosongInfo = ({ teks }) => <div className="p-8 text-center text-sm text-gray-500">{teks}</div>;
+
+// Nama penanda tangan (kepsek / wali kelas / guru) pada dokumen cetak: tetap SATU baris dan ukuran hurufnya menyesuaikan panjang nama
+// agar tidak terpotong atau turun ke baris bawah. Nama pendek tidak berubah. `maks` = lebar maksimum yang tersedia (mm/pt/px).
+// Bila nama sangat panjang dan sudah dikecilkan sampai batas terbaca, barulah dibagi dua baris secara seimbang.
+const NamaTtd = ({ nama, maks = '60mm', min = 0.72 }) => {
+  const ref = useRef(null);
+  const teks = String(nama || '');
+  React.useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const sesuaikan = () => {
+      el.style.fontSize = ''; el.style.whiteSpace = 'nowrap';
+      const probe = document.createElement('div');
+      probe.style.cssText = `position:absolute;visibility:hidden;height:0;overflow:hidden;width:${maks}`;
+      document.body.appendChild(probe);
+      const batas = probe.offsetWidth;
+      probe.remove();
+      const lebar = el.offsetWidth;
+      if (batas > 0 && lebar > batas) {
+        const asli = parseFloat(getComputedStyle(el).fontSize) || 12;
+        el.style.fontSize = `${asli * Math.max(min, (batas / lebar) * 0.98)}px`;
+        if (el.offsetWidth > batas) { el.style.whiteSpace = 'normal'; el.style.textWrap = 'balance'; }
+      }
+    };
+    sesuaikan();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(sesuaikan);
+    return undefined;
+  }, [teks, maks]);
+  return <span ref={ref} style={{ whiteSpace: 'nowrap' }}>{teks}</span>;
+};

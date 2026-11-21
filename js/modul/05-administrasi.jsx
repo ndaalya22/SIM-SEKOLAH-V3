@@ -1085,15 +1085,15 @@ const SuratLembar = ({ data, sekolah, idCetak }) => {
           <p>Bersama ini kami sertakan Buku Laporan Hasil Pendidikan (Raport) yang bersangkutan. Demikian Keterangan ini dibuat untuk dipergunakan sebagaimana mestinya.</p>
         </>)}
 
-        {/* Tanda tangan + stempel */}
+        {/* Tanda tangan + stempel — lebar kolom menyesuaikan panjang nama (rata kanan pada margin halaman), nama tidak terpotong */}
         <div style={{ height: '15.87pt' }}></div>
-        <div style={{ marginLeft: '297.7pt', position: 'relative' }}>
+        <div style={{ marginLeft: 'auto', width: 'max-content', minWidth: '189.6pt', maxWidth: '330pt', position: 'relative' }}>
           <img src={SK_TTD_STEMPEL} alt="" style={{ position: 'absolute', left: '-78pt', top: '12pt', width: '171pt', height: 'auto', pointerEvents: 'none', mixBlendMode: 'multiply', opacity: 0.92 }} />
-          <p style={{ textAlign: 'left' }}>Rawamerta, {d.tanggalSurat}</p>
-          <p style={{ textAlign: 'left' }}>Kepala SDIT Annihayah</p>
+          <p style={{ textAlign: 'left', position: 'relative' }}>Rawamerta, {d.tanggalSurat}</p>
+          <p style={{ textAlign: 'left', position: 'relative' }}>Kepala SDIT Annihayah</p>
           <div style={{ height: `${15.87 * 4}pt` }}></div>
-          <p style={{ textAlign: 'left' }}><b><u>{sekolah.kepsek}</u></b></p>
-          <p style={{ textAlign: 'left' }}>NIP. {sekolah.nipKepsek || '-'}</p>
+          <p style={{ textAlign: 'left', position: 'relative' }}><b><u><NamaTtd nama={sekolah.kepsek} maks="330pt" /></u></b></p>
+          <p style={{ textAlign: 'left', position: 'relative' }}>NIP. {sekolah.nipKepsek || '-'}</p>
         </div>
 
         {jenis === 'pindah' && (<>
